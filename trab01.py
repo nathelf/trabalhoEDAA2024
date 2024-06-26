@@ -64,13 +64,6 @@ class AVLTree:
             return 0
         return self.getHeight(root.left) - self.getHeight(root.right)
 
-    def preOrder(self, root):
-        if not root:
-            return
-        print("{0} ".format(root.key), end="")
-        self.preOrder(root.left)
-        self.preOrder(root.right)
-
     def search(self, root, key):
         if root is None or root.key == key:
             return root
@@ -187,8 +180,10 @@ class RBTree:
         y.parent = x.parent
         if x.parent == None:
             self.root = y
-        elif x == x.parent.right:
+        elif x.parent.right == y:
             x.parent.right = y
+        else:
+            x.parent.left = y
         y.right = x
         x.parent = y
 
@@ -201,15 +196,6 @@ class RBTree:
         if key < node.key:
             return self.searchTreeHelper(node.left, key)
         return self.searchTreeHelper(node.right, key)
-
-    def preOrder(self):
-        self.preOrderHelper(self.root)
-
-    def preOrderHelper(self, node):
-        if node != self.TNULL:
-            print(node.key, end=" ")
-            self.preOrderHelper(node.left)
-            self.preOrderHelper(node.right)
 
 # Função para medir tempo e comparações
 def measure_performance(tree, elements):
@@ -259,54 +245,55 @@ def read_elements_from_file(file_path):
         return []
 
 # Função para processar arquivos em um diretório
-def process_files_in_directory(directory_path):
+def process_files_in_directory(directory, tree_class):
     results = []
 
-    for filename in os.listdir(directory_path):
-        file_path = os.path.join(directory_path, filename)
-        if os.path.isfile(file_path) and file_path.endswith(".txt"):
+    try:
+        input_files = os.listdir(directory)
+    except Exception as e:
+        print(f"Erro ao acessar o diretório {directory}: {e}")
+        return
+
+    for input_file in input_files:
+        file_path = os.path.join(directory, input_file)
+        if os.path.isfile(file_path) and file_path.endswith('.txt'):
             elements = read_elements_from_file(file_path)
             if elements:
-                avl_tree = AVLTree()
-                rb_tree = RBTree()
-
-                avl_results = measure_performance(avl_tree, elements)
-                rb_results = measure_performance(rb_tree, elements)
-
+                tree = tree_class()
+                performance = measure_performance(tree, elements)
                 results.append({
-                    'file_name': filename,
-                    'avl_construction_comparisons': avl_results['construction_comparisons'],
-                    'avl_construction_time': avl_results['construction_time'],
-                    'avl_search_comparisons': avl_results['search_comparisons'],
-                    'avl_search_time': avl_results['search_time'],
-                    'rb_construction_comparisons': rb_results['construction_comparisons'],
-                    'rb_construction_time': rb_results['construction_time'],
-                    'rb_search_comparisons': rb_results['search_comparisons'],
-                    'rb_search_time': rb_results['search_time']
+                    'file_name': input_file,
+                    'construction_comparisons': performance['construction_comparisons'],
+                    'construction_time': performance['construction_time'],
+                    'search_comparisons': performance['search_comparisons'],
+                    'search_time': performance['search_time']
                 })
 
-    # Salvar resultados em CSV
     if results:
-        csv_file_path = os.path.join(directory_path, "results.csv")
-        with open(csv_file_path, mode='w', newline='') as file:
-            fieldnames = ['file_name', 'avl_construction_comparisons', 'avl_construction_time',
-                          'avl_search_comparisons', 'avl_search_time', 'rb_construction_comparisons',
-                          'rb_construction_time', 'rb_search_comparisons', 'rb_search_time']
+        output_file = f"results_{tree_class.__name__}.csv"
+        with open(output_file, mode='w', newline='') as file:
+            fieldnames = ['file_name', 'construction_comparisons', 'construction_time',
+                          'search_comparisons', 'search_time']
             writer = csv.DictWriter(file, fieldnames=fieldnames)
             writer.writeheader()
             for result in results:
                 writer.writerow(result)
-        print(f"Resultados salvos em {csv_file_path}")
-    else:
-        print("Nenhum arquivo válido encontrado para processar.")
+        print(f"Resultados salvos em {output_file}")
 
-# Função principal para execução
-def main():
-    construction_folder = "construction_files"
-    query_folder = "query_files"
+# Caminhos para os diretórios de entrada
+construction_folder = r"C:\Users\pante\OneDrive\Área de Trabalho\Trabalho Estrutura de Dados 02\4\Construir"
+query_folder = r"C:\Users\pante\OneDrive\Área de Trabalho\Trabalho Estrutura de Dados 02\4\Consultar"
 
-    process_files_in_directory(construction_folder)
-    process_files_in_directory(query_folder)
+# Processar arquivos no diretório de construção
+print("Processando arquivos no diretório de construção (AVL Tree):")
+process_files_in_directory(construction_folder, AVLTree)
 
-if __name__ == "__main__":
-    main()
+print("Processando arquivos no diretório de construção (Red-Black Tree):")
+process_files_in_directory(construction_folder, RBTree)
+
+# Processar arquivos no diretório de consulta
+print("Processando arquivos no diretório de consulta (AVL Tree):")
+process_files_in_directory(query_folder, AVLTree)
+
+print("Processando arquivos no diretório de consulta (Red-Black Tree):")
+process_files_in_directory(query_folder, RBTree)
