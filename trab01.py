@@ -1,5 +1,6 @@
 import os
 import time
+from collections import defaultdict
 
 class AVLNode:
     def __init__(self, key):
@@ -52,7 +53,7 @@ class AVLTree:
 
     def left_rotate(self, z):
         if not z or not z.right:
-            return z  # Adicionando verificação de segurança
+            return z
 
         y = z.right
         T2 = y.left
@@ -64,7 +65,7 @@ class AVLTree:
 
     def right_rotate(self, z):
         if not z or not z.left:
-            return z  # Adicionando verificação de segurança
+            return z
 
         y = z.left
         T3 = y.right
@@ -183,7 +184,7 @@ class RBTree:
 
     def left_rotate(self, x):
         if not x or not x.right:
-            return  # Adicionando verificação de segurança
+            return
 
         y = x.right
         x.right = y.left
@@ -201,7 +202,7 @@ class RBTree:
 
     def right_rotate(self, x):
         if not x or not x.left:
-            return  # Adicionando verificação de segurança
+            return
 
         y = x.left
         x.left = y.right
@@ -232,18 +233,24 @@ def rb_search(tree, key):
 def read_input_file(file_path):
     with open(file_path, 'r') as file:
         content = file.read()
-        return [int(num) for num in content.split()]
+        keys = [int(num) for num in content.split()]
+        print(f"Arquivo {file_path} tem {len(keys)} elementos.")  # Imprime o tamanho do conjunto de dados
+        return keys
 
 def process_files_in_directory(directory, construct=True):
-    insert_times = {'AVL': 0, 'RB': 0}
-    search_times = {'AVL': 0, 'RB': 0}
-    comparisons = {'AVL': 0, 'RB': 0}
+    insert_times = {'AVL': defaultdict(float), 'RB': defaultdict(float)}
+    search_times = {'AVL': defaultdict(float), 'RB': defaultdict(float)}
+    comparisons = {'AVL': defaultdict(int), 'RB': defaultdict(int)}
+    counts = {'AVL': defaultdict(int), 'RB': defaultdict(int)}
     all_keys = []
 
     for filename in os.listdir(directory):
         file_path = os.path.join(directory, filename)
         if os.path.isfile(file_path) and filename.endswith('.txt'):
             keys = read_input_file(file_path)
+            if not keys:
+                continue
+            size = len(keys)
             all_keys.extend(keys)
             if construct:
                 # AVL Tree
@@ -251,41 +258,54 @@ def process_files_in_directory(directory, construct=True):
                 avl_insert_time = sum(avl_insert(avl_tree, key) for key in keys)
                 avl_search_time = sum(avl_search(avl_tree, key)[1] for key in keys)
 
-                insert_times['AVL'] += avl_insert_time
-                search_times['AVL'] += avl_search_time
-                comparisons['AVL'] += avl_tree.comparisons
+                insert_times['AVL'][size] += avl_insert_time
+                search_times['AVL'][size] += avl_search_time
+                comparisons['AVL'][size] += avl_tree.comparisons
+                counts['AVL'][size] += 1
 
                 # Red-Black Tree
                 rb_tree = RBTree()
                 rb_insert_time = sum(rb_insert(rb_tree, key) for key in keys)
                 rb_search_time = sum(rb_search(rb_tree, key)[1] for key in keys)
 
-                insert_times['RB'] += rb_insert_time
-                search_times['RB'] += rb_search_time
-                comparisons['RB'] += rb_tree.comparisons
+                insert_times['RB'][size] += rb_insert_time
+                search_times['RB'][size] += rb_search_time
+                comparisons['RB'][size] += rb_tree.comparisons
+                counts['RB'][size] += 1
             else:
-                # For consulta (search) phase, you can store all the keys and then search
                 all_keys.extend(keys)
 
-    return insert_times, search_times, comparisons, all_keys
+    return insert_times, search_times, comparisons, counts, all_keys
 
 def main():
-    dir1 = 'C:\\Users\\pante\\OneDrive\\Área de Trabalho\\Trabalho Estrutura de Dados 02\\4\\Construir'  # Caminho para a primeira pasta (construção)
-    dir2 = 'C:\\Users\\pante\\OneDrive\\Área de Trabalho\\Trabalho Estrutura de Dados 02\\4\\Consultar'  # Caminho para a segunda pasta (consulta)
+    dir1 = 'C:\\Users\\pante\\OneDrive\\Área de Trabalho\\Trabalho Estrutura de Dados 02\\4\\Construir'
+    dir2 = 'C:\\Users\\pante\\OneDrive\\Área de Trabalho\\Trabalho Estrutura de Dados 02\\4\\Consultar'
 
     print("Construindo árvores usando arquivos na pasta 1:")
-    insert_times1, search_times1, comparisons1, all_keys1 = process_files_in_directory(dir1, construct=True)
+    insert_times1, search_times1, comparisons1, counts1, all_keys1 = process_files_in_directory(dir1, construct=True)
 
     print("AVL Tree - Pasta 1 (Construção):")
-    print(f"Tempo total de inserção: {insert_times1['AVL']:.6f} seconds")
-    print(f"Total Comparações: {comparisons1['AVL']}")
+    for size in insert_times1['AVL']:
+        avg_insert_time = insert_times1['AVL'][size] / counts1['AVL'][size]
+        avg_comparisons = comparisons1['AVL'][size] / counts1['AVL'][size]
+        print(f"Tamanho do arranjo: {size}")
+        print(f"Total insert time: {insert_times1['AVL'][size]:.6f} seconds")
+        print(f"Total comparisons: {comparisons1['AVL'][size]}")
+        print(f"Média do tempo de inserção: {avg_insert_time:.6f} seconds")
+        print(f"Média das comparações: {avg_comparisons:.2f}")
 
     print("\nRed-Black Tree - Pasta 1 (Construção):")
-    print(f"Tempo total de inserção: {insert_times1['RB']:.6f} seconds")
-    print(f"Total Comparações: {comparisons1['RB']}")
+    for size in insert_times1['RB']:
+        avg_insert_time = insert_times1['RB'][size] / counts1['RB'][size]
+        avg_comparisons = comparisons1['RB'][size] / counts1['RB'][size]
+        print(f"Tamanho do arranjo: {size}")
+        print(f"Total insert time: {insert_times1['RB'][size]:.6f} seconds")
+        print(f"Total comparisons: {comparisons1['RB'][size]}")
+        print(f"Média do tempo de inserção: {avg_insert_time:.6f} seconds")
+        print(f"Média das comparações: {avg_comparisons:.2f}")
 
     print("\nConsultando árvores usando arquivos na pasta 2:")
-    insert_times2, search_times2, comparisons2, all_keys2 = process_files_in_directory(dir2, construct=False)
+    insert_times2, search_times2, comparisons2, counts2, all_keys2 = process_files_in_directory(dir2, construct=False)
     
     # AVL Tree
     avl_tree = AVLTree()
@@ -293,8 +313,8 @@ def main():
         avl_insert(avl_tree, key)
     avl_search_time = sum(avl_search(avl_tree, key)[1] for key in all_keys2)
     print("AVL Tree - Pasta 2 (Consulta):")
-    print(f"Tempo total de pesquisa: {avl_search_time:.6f} seconds")
-    print(f"Comparações totais: {avl_tree.comparisons}")
+    print(f"Total search time: {avl_search_time:.6f} seconds")
+    print(f"Total comparisons: {avl_tree.comparisons}")
 
     # Red-Black Tree
     rb_tree = RBTree()
@@ -302,8 +322,19 @@ def main():
         rb_insert(rb_tree, key)
     rb_search_time = sum(rb_search(rb_tree, key)[1] for key in all_keys2)
     print("\nRed-Black Tree - Pasta 2 (Consulta):")
-    print(f"Tempo total de pesquisa: {rb_search_time:.6f} seconds")
-    print(f"Comparações totais: {rb_tree.comparisons}")
+    print(f"Total search time: {rb_search_time:.6f} seconds")
+    print(f"Total comparisons: {rb_tree.comparisons}")
+
+    # Print average times
+    print("\nMédia dos tempos de inserção por tamanho de arranjo - AVL Tree:")
+    for size in insert_times1['AVL']:
+        avg_time = insert_times1['AVL'][size] / counts1['AVL'][size]
+        print(f"Tamanho do arranjo: {size}, Média do tempo: {avg_time:.6f} seconds")
+
+    print("\nMédia dos tempos de inserção por tamanho de arranjo - Red-Black Tree:")
+    for size in insert_times1['RB']:
+        avg_time = insert_times1['RB'][size] / counts1['RB'][size]
+        print(f"Tamanho do arranjo: {size}, Média do tempo: {avg_time:.6f} seconds")
 
 if __name__ == "__main__":
     main()
