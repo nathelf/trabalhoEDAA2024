@@ -253,60 +253,80 @@ def process_files_in_directory(directory, construct=True):
             size = len(keys)
             all_keys.extend(keys)
             if construct:
-                # AVL Tree
-                avl_tree = AVLTree()
-                avl_insert_time = sum(avl_insert(avl_tree, key) for key in keys)
-                avl_search_time = sum(avl_search(avl_tree, key)[1] for key in keys)
+                # Run 20 times for averaging
+                for _ in range(20):
+                    # AVL Tree
+                    avl_tree = AVLTree()
+                    avl_insert_time = sum(avl_insert(avl_tree, key) for key in keys)
+                    avl_search_time = sum(avl_search(avl_tree, key)[1] for key in keys)
 
-                insert_times['AVL'][size] += avl_insert_time
-                search_times['AVL'][size] += avl_search_time
-                comparisons['AVL'][size] += avl_tree.comparisons
-                counts['AVL'][size] += 1
+                    insert_times['AVL'][size] += avl_insert_time
+                    search_times['AVL'][size] += avl_search_time
+                    comparisons['AVL'][size] += avl_tree.comparisons
+                    counts['AVL'][size] += 1
 
-                # Red-Black Tree
-                rb_tree = RBTree()
-                rb_insert_time = sum(rb_insert(rb_tree, key) for key in keys)
-                rb_search_time = sum(rb_search(rb_tree, key)[1] for key in keys)
+                    # Red-Black Tree
+                    rb_tree = RBTree()
+                    rb_insert_time = sum(rb_insert(rb_tree, key) for key in keys)
+                    rb_search_time = sum(rb_search(rb_tree, key)[1] for key in keys)
 
-                insert_times['RB'][size] += rb_insert_time
-                search_times['RB'][size] += rb_search_time
-                comparisons['RB'][size] += rb_tree.comparisons
-                counts['RB'][size] += 1
+                    insert_times['RB'][size] += rb_insert_time
+                    search_times['RB'][size] += rb_search_time
+                    comparisons['RB'][size] += rb_tree.comparisons
+                    counts['RB'][size] += 1
             else:
                 all_keys.extend(keys)
+
+    # Average the times and comparisons over the 20 runs
+    for size in counts['AVL']:
+        if counts['AVL'][size] > 0:
+            insert_times['AVL'][size] /= 20
+            search_times['AVL'][size] /= 20
+            comparisons['AVL'][size] /= 20
+
+    for size in counts['RB']:
+        if counts['RB'][size] > 0:
+            insert_times['RB'][size] /= 20
+            search_times['RB'][size] /= 20
+            comparisons['RB'][size] /= 20
 
     return insert_times, search_times, comparisons, counts, all_keys
 
 def main():
-    dir1 = 'C:\\Users\\pante\\OneDrive\\Área de Trabalho\\Trabalho Estrutura de Dados 02\\4\\Construir'
-    dir2 = 'C:\\Users\\pante\\OneDrive\\Área de Trabalho\\Trabalho Estrutura de Dados 02\\4\\Consultar'
+    from google.colab import drive  # Google Drive Access
+    drive.mount('/content/drive')
+    
+    dir1 = '/content/drive/MyDrive/UNIOESTE/EstruturadeDados/2024/TRABALHO02/4/Construir'
+    dir2 = '/content/drive/MyDrive/UNIOESTE/EstruturadeDados/2024/TRABALHO02/4/Consultar'
 
     print("Construindo árvores usando arquivos na pasta 1:")
     insert_times1, search_times1, comparisons1, counts1, all_keys1 = process_files_in_directory(dir1, construct=True)
 
     print("AVL Tree - Pasta 1 (Construção):")
     for size in insert_times1['AVL']:
-        avg_insert_time = insert_times1['AVL'][size] / counts1['AVL'][size]
+        total_insert_time = insert_times1['AVL'][size]
+        avg_insert_time = total_insert_time / counts1['AVL'][size]
         avg_comparisons = comparisons1['AVL'][size] / counts1['AVL'][size]
         print(f"Tamanho do arranjo: {size}")
-        print(f"Total insert time: {insert_times1['AVL'][size]:.6f} seconds")
+        print(f"Total insert time: {total_insert_time:.6f} seconds")
         print(f"Total comparisons: {comparisons1['AVL'][size]}")
         print(f"Média do tempo de inserção: {avg_insert_time:.6f} seconds")
         print(f"Média das comparações: {avg_comparisons:.2f}")
 
     print("\nRed-Black Tree - Pasta 1 (Construção):")
     for size in insert_times1['RB']:
-        avg_insert_time = insert_times1['RB'][size] / counts1['RB'][size]
+        total_insert_time = insert_times1['RB'][size]
+        avg_insert_time = total_insert_time / counts1['RB'][size]
         avg_comparisons = comparisons1['RB'][size] / counts1['RB'][size]
         print(f"Tamanho do arranjo: {size}")
-        print(f"Total insert time: {insert_times1['RB'][size]:.6f} seconds")
+        print(f"Total insert time: {total_insert_time:.6f} seconds")
         print(f"Total comparisons: {comparisons1['RB'][size]}")
         print(f"Média do tempo de inserção: {avg_insert_time:.6f} seconds")
         print(f"Média das comparações: {avg_comparisons:.2f}")
 
     print("\nConsultando árvores usando arquivos na pasta 2:")
     insert_times2, search_times2, comparisons2, counts2, all_keys2 = process_files_in_directory(dir2, construct=False)
-    
+
     # AVL Tree
     avl_tree = AVLTree()
     for key in all_keys1:
@@ -328,12 +348,12 @@ def main():
     # Print average times
     print("\nMédia dos tempos de inserção por tamanho de arranjo - AVL Tree:")
     for size in insert_times1['AVL']:
-        avg_time = insert_times1['AVL'][size] / counts1['AVL'][size]
+        avg_time = insert_times1['AVL'][size]
         print(f"Tamanho do arranjo: {size}, Média do tempo: {avg_time:.6f} seconds")
 
     print("\nMédia dos tempos de inserção por tamanho de arranjo - Red-Black Tree:")
     for size in insert_times1['RB']:
-        avg_time = insert_times1['RB'][size] / counts1['RB'][size]
+        avg_time = insert_times1['RB'][size]
         print(f"Tamanho do arranjo: {size}, Média do tempo: {avg_time:.6f} seconds")
 
 if __name__ == "__main__":
