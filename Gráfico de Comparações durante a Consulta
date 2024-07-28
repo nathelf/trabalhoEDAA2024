@@ -1,0 +1,41 @@
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
+
+# Ordenar os dados por tamanho do arranjo
+# Use 'avl_sizes' instead of 'tamanho_avl'
+sorted_indices_avl = sorted(range(len(avl_sizes)), key=lambda k: avl_sizes[k])
+tamanho_avl_sorted = [avl_sizes[i] for i in sorted_indices_avl]
+tempo_medio_avl_sorted = [avl_times[i] for i in sorted_indices_avl] # Use 'avl_times' instead of 'tempo_medio_avl'
+comparacoes_avl_sorted = [avl_comparisons[i] for i in sorted_indices_avl] # Use 'avl_comparisons' instead of 'comparacoes_avl'
+
+# Similarly, adjust the Red-Black tree data
+sorted_indices_rbt = sorted(range(len(rb_sizes)), key=lambda k: rb_sizes[k]) # Use 'rb_sizes' instead of 'tamanho_rbt'
+tamanho_rbt_sorted = [rb_sizes[i] for i in sorted_indices_rbt]
+tempo_medio_rbt_sorted = [rb_times[i] for i in sorted_indices_rbt] # Use 'rb_times' instead of 'tempo_medio_rbt'
+comparacoes_rbt_sorted = [rb_comparisons[i] for i in sorted_indices_rbt] # Use 'rb_comparisons' instead of 'comparacoes_rbt'
+
+# Gráfico de comparações durante a Consulta com vetores ordenados
+plt.figure(figsize=(14, 7))
+plt.plot(tamanho_avl_sorted, comparacoes_avl_sorted, label='AVL Tree', marker='o')
+plt.plot(tamanho_rbt_sorted, comparacoes_rbt_sorted, label='Red-Black Tree', marker='o')
+plt.xlabel('Tamanho do Arranjo', fontsize=12)
+plt.ylabel('Comparações', fontsize=12)
+plt.title('Comparações durante a Consulta - AVL vs Red-Black', fontsize=14)
+plt.legend()
+plt.grid(True, which='both', linestyle='--', linewidth=0.5)
+plt.ylim(0, max(comparacoes_rbt_sorted) * 1.1)
+
+# Ajustar os ticks do eixo y para serem mais legíveis
+plt.gca().yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, pos: '{:,.0f}'.format(x)))
+plt.show()
+
+# Gráfico de tempo médio de inserção durante a Consulta com vetores ordenados
+plt.figure(figsize=(14, 7))
+plt.plot(tamanho_avl_sorted, tempo_medio_avl_sorted, label='AVL Tree', marker='o')
+plt.plot(tamanho_rbt_sorted, tempo_medio_rbt_sorted, label='Red-Black Tree', marker='o')
+plt.xlabel('Tamanho do Arranjo', fontsize=12)
+plt.ylabel('Tempo Médio de Inserção (segundos)', fontsize=12)
+plt.title('Tempo Médio de Inserção durante a Consulta - AVL vs Red-Black', fontsize=14)
+plt.legend()
+plt.grid(True, which='both', linestyle='--', linewidth=0.5)
+plt.show()
