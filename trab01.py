@@ -338,6 +338,17 @@ def main():
     print(f"Total comparisons: {avl_tree.comparisons}")
     for size, time in zip(counts2['AVL'].keys(), avl_search_times):
       print(f"Tamanho do vetor: {size}, Tempo de consulta: {time:.6f} seconds")
+    
+    print("AVL Tree:")
+    for size in search_times1['AVL']: 
+        total_search_time = search_times1['AVL'][size] 
+        avg_search_time = total_search_time / counts1['AVL'][size] 
+        avg_comparisons = comparisons1['AVL'][size] / counts1['AVL'][size]
+        print(f"Tamanho do arranjo: {size}")
+        print(f"Tempo total de busca: {total_search_time:.6f} segundos")
+        print(f"Tempo médio de busca: {avg_search_time:.6f} segundos")
+        print(f"Número médio de comparações: {avg_comparisons}")
+        print("----")
 
 
     # Red-Black Tree
