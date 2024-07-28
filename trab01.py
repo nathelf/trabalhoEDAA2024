@@ -295,7 +295,7 @@ def process_files_in_directory(directory, construct=True):
 def main():
     from google.colab import drive  # Google Drive Access
     drive.mount('/content/drive')
-    
+
     dir1 = '/content/drive/MyDrive/UNIOESTE/EstruturadeDados/2024/TRABALHO02/4/Construir'
     dir2 = '/content/drive/MyDrive/UNIOESTE/EstruturadeDados/2024/TRABALHO02/4/Consultar'
 
@@ -331,30 +331,48 @@ def main():
     avl_tree = AVLTree()
     for key in all_keys1:
         avl_insert(avl_tree, key)
-    avl_search_time = sum(avl_search(avl_tree, key)[1] for key in all_keys2)
+    avl_search_times = [avl_search(avl_tree, key)[1] for key in all_keys2]
+    total_avl_search_time = sum(avl_search_times)
     print("AVL Tree - Pasta 2 (Consulta):")
-    print(f"Total search time: {avl_search_time:.6f} seconds")
+    print(f"Total search time: {total_avl_search_time:.6f} seconds")
     print(f"Total comparisons: {avl_tree.comparisons}")
+    for size, time in zip(counts2['AVL'].keys(), avl_search_times):
+      print(f"Tamanho do vetor: {size}, Tempo de consulta: {time:.6f} seconds")
+
 
     # Red-Black Tree
     rb_tree = RBTree()
     for key in all_keys1:
         rb_insert(rb_tree, key)
-    rb_search_time = sum(rb_search(rb_tree, key)[1] for key in all_keys2)
+    rb_search_times = [rb_search(rb_tree, key)[1] for key in all_keys2]
+    total_rb_search_time = sum(rb_search_times)
     print("\nRed-Black Tree - Pasta 2 (Consulta):")
-    print(f"Total search time: {rb_search_time:.6f} seconds")
+    print(f"Total search time: {total_rb_search_time:.6f} seconds")
     print(f"Total comparisons: {rb_tree.comparisons}")
+    for size, time in zip(counts2['RB'].keys(), rb_search_times):
+      print(f"Tamanho do vetor: {size}, Tempo de consulta: {time:.6f} seconds")
+
+    print("Red-Black Tree - Pasta 1 (Busca):")
+    for size in search_times1['RB']: # Changed rb_search_times to search_times1
+        total_search_time = search_times1['RB'][size] # Changed rb_search_times to search_times1
+        avg_search_time = total_search_time / counts1['RB'][size] 
+        avg_comparisons = comparisons1['RB'][size] / counts1['RB'][size]
+        print(f"Tamanho do arranjo: {size}")
+        print(f"Tempo total de busca: {total_search_time:.6f} segundos")
+        print(f"Tempo médio de busca: {avg_search_time:.6f} segundos")
+        print(f"Número médio de comparações: {avg_comparisons}")
+        print("----")
 
     # Print average times
-    print("\nMédia dos tempos de inserção por tamanho de arranjo - AVL Tree:")
-    for size in insert_times1['AVL']:
-        avg_time = insert_times1['AVL'][size]
-        print(f"Tamanho do arranjo: {size}, Média do tempo: {avg_time:.6f} seconds")
+    #print("\nMédia dos tempos de inserção por tamanho de arranjo - AVL Tree:")
+    #for size in insert_times1['AVL']:
+        #avg_time = insert_times1['AVL'][size]
+        #print(f"Tamanho do arranjo: {size}, Média do tempo: {avg_time:.6f} seconds")
 
-    print("\nMédia dos tempos de inserção por tamanho de arranjo - Red-Black Tree:")
-    for size in insert_times1['RB']:
-        avg_time = insert_times1['RB'][size]
-        print(f"Tamanho do arranjo: {size}, Média do tempo: {avg_time:.6f} seconds")
+   #print("\nMédia dos tempos de inserção por tamanho de arranjo - Red-Black Tree:")
+    #for size in insert_times1['RB']:
+        #avg_time = insert_times1['RB'][size]
+        #print(f"Tamanho do arranjo: {size}, Média do tempo: {avg_time:.6f} seconds")
 
 if __name__ == "__main__":
     main()
